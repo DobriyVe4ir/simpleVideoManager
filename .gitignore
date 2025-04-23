@@ -52,3 +52,7 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+/.vs
+/simpleVideoManager/simpleVideoManager/wwwroot/Videos/Аниме
+/simpleVideoManager/simpleVideoManager/wwwroot/Videos
+/simpleVideoManager/simpleVideoManager/appsettings.Development.json

@@ -1,0 +1,77 @@
+﻿@using System.IO
+@using simpleVideoManager.Scripts
+@inject VideoState videoState
+@rendermode InteractiveServer
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">simpleVideoManager</a>
+    </div>
+</div>
+
+<div class="nav-scrollable px-3">
+    <nav class="flex-column">
+
+        <div class="nav-item px-3">
+            <span class="nav-link disabled">🎞 Мои видео</span>
+        </div>
+
+        @foreach (var group in groupedVideos)
+        {
+            var collapseId = $"collapse-{group.Key.GetHashCode()}";
+
+            <div class="nav-item px-3">
+                <div class="nav-link text-white fw-bold"
+                     role="button"
+                     data-bs-toggle="collapse"
+                     data-bs-target="#@collapseId"
+                     aria-expanded="false"
+                     aria-controls="@collapseId"
+                     style="cursor: pointer;">
+                    📁 @group.Key
+                </div>
+                <div class="collapse ps-3" id="@collapseId">
+                    @foreach (var video in group.Value)
+                    {
+                        <div class="nav-item text-truncate">
+                            <a class="nav-link" @onclick="@(() => SelectVideo(video))">
+                                🎬 @Path.GetFileName(video)
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    private List<string> videosPath = new();
+    private Dictionary<string, List<string>> groupedVideos = new();
+
+    void SelectVideo(string videoPath)
+    {
+        videoState.CurrentVideoPath = GetWebPath(videoPath);
+    }
+
+    protected override void OnInitialized()
+    {
+        videosPath = FilesManager.GetFilesWithFormats();
+
+        // Группировка по директории
+        groupedVideos = videosPath
+        .GroupBy(path =>
+        {
+            var dir = Path.GetDirectoryName(path);
+            return string.IsNullOrEmpty(dir)
+                ? "Без папки"
+                : Path.GetFileName(dir.TrimEnd(Path.DirectorySeparatorChar));
+        })
+        .ToDictionary(g => g.Key, g => g.ToList());
+    }
+
+    private string GetWebPath(string path)
+    {
+        return "/" + path.Replace("\\", "/").Replace("wwwroot/", "");
+    }
+}

@@ -1,0 +1,55 @@
+﻿@using simpleVideoManager.Scripts
+@using simpleVideoManager.Components.Layout;
+@implements IDisposable
+@inject ILogger<Home> Logger
+@inject VideoState videoState;
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        @if (!string.IsNullOrEmpty(videoState.CurrentVideoPath))
+        {
+            <h3>
+                @Path.GetFileName(videoState.CurrentVideoPath)
+            </h3>
+            <video id="videoId"
+                width="100%" 
+                controls  
+                style="max-width: 800px;" 
+                @key="videoState.CurrentVideoPath">
+                    <source src="@videoState.CurrentVideoPath" type="video/mp4" />
+                    Ваш браузер не поддерживает видео.
+            </video>
+
+            <script>
+                const player = new Plyr('#player');
+            </script>
+        }
+        else
+        {
+            <div class="alert alert-info mt-3" role="alert">
+                📂 Выберите видео из меню слева
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("initialized");
+        videoState.OnVideoChanged += async () =>
+        {
+            await InvokeAsync(StateHasChanged);
+        };
+    }
+
+    public void Dispose()
+    {
+        videoState.OnVideoChanged -= StateHasChanged;
+    }
+}
